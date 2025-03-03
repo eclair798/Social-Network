@@ -1,0 +1,160 @@
+specification {
+    element person {
+        style {
+            shape person
+            color blue
+        }
+    }
+    element softwareSystem
+    element container
+    element component
+    element database {
+        style {
+            shape cylinder
+        }
+    }
+    element messageBroker { 
+        style {
+            shape queue
+        }
+    }
+}
+
+model {
+  user = person "User" "Пользователь социальной сети"
+
+  socialNetwork = softwareSystem "Социальная сеть" {
+
+    apiGateway = container "API Gateway" {
+      description "Маршрутизация запросов"
+
+      component requestManager "Request Manager" "Обрабатывает входящие запросы"
+    }
+
+    userService = container "User Service" {
+      description "Управление пользователями"
+      
+      component accessManager "Access Manager" "Управляет аутентификацией"
+      component userManager "User Manager" "Управляет данными пользователей"
+    }
+
+    postService = container "Post Service" {
+      description "Управление постами"
+      
+      component postManager "Post Manager" "Управляет постами"
+      component commentManager "Comment Manager" "Управляет комментариями"
+    }
+
+    statisticService = container "Statistics Service" {
+      description "Анализ статистики"
+
+      component statisticCollector "Statistic Collector" "Собирает статистические данные"
+    }
+
+    userDb = database "PostgreSQL" {
+      description "Хранение данных пользователей"
+      technology "Database"
+    }
+
+    postDb = database "PostgreSQL" {
+      description "Хранение данных постов"
+      technology "Database"
+    }
+
+    clickhouseDb = database "Clickhouse" {
+      description "Хранение статистических данных"
+      technology "Analytical Database"
+    }
+
+    kafka = messageBroker "Kafka" {
+      description "Обмен событиями между сервисами"
+      technology "Message Broker"
+    }
+  }
+
+  // Взаимодействие пользователя с системой
+  user -> socialNetwork.apiGateway.requestManager "Использует"
+  
+  // Маршрутизация запросов API Gateway
+  socialNetwork.apiGateway.requestManager -> socialNetwork.userService.accessManager "Маршрутизирует/Проверяет аутентификацию"
+  socialNetwork.apiGateway.requestManager -> socialNetwork.postService.postManager "Маршрутизирует"
+  socialNetwork.apiGateway.requestManager -> socialNetwork.statisticService.statisticCollector "Маршрутизирует"
+
+  // Access Manager взаимодействует с User Manager
+  socialNetwork.userService.accessManager -> socialNetwork.userService.userManager "Использует"
+  
+  // User Manager взаимодействует с базой данных пользователей и Kafka
+  socialNetwork.userService.userManager -> socialNetwork.userDb "Читает/Пишет"
+  socialNetwork.userService.userManager -> socialNetwork.kafka "Публикует/Подписывается"
+  
+  // Post Manager взаимодействует с Comment Manager, базой данных и Kafka
+  socialNetwork.postService.postManager -> socialNetwork.postService.commentManager "Использует"
+  socialNetwork.postService.postManager -> socialNetwork.postDb "Читает/Пишет"
+  socialNetwork.postService.commentManager -> socialNetwork.postDb "Читает/Пишет"
+  socialNetwork.postService.postManager -> socialNetwork.kafka "Публикует/Подписывается"
+
+
+  // Statistic Service взаимодействует с Clickhouse и Kafka
+  socialNetwork.statisticService.statisticCollector -> socialNetwork.clickhouseDb "Читает/Пишет"
+  socialNetwork.statisticService.statisticCollector -> socialNetwork.kafka "Подписывается"  
+
+  
+
+}
+
+views {
+    view index {
+        title 'System Context'
+
+        include user
+        include socialNetwork with {
+            navigateTo containerDiagram
+        }
+        style user {
+            shape person
+        }
+        style socialNetwork {
+            shape rectangle
+        }
+    } 
+
+    view containerDiagram {
+        title 'Container Diagram'
+        include *
+
+        style user {
+            color muted
+        }
+        include socialNetwork.**
+        style socialNetwork.userDb {
+            color gray
+            shape storage
+        }
+        style socialNetwork.postDb {
+            color gray
+            shape storage
+        }
+        style socialNetwork.clickhouseDb {
+            color gray
+            shape storage
+        }
+        style socialNetwork.apiGateway.requestManager {
+            color green
+        }
+        style socialNetwork.userService.accessManager {
+            color green
+        }
+        style socialNetwork.userService.userManager {
+            color green
+        }
+        style socialNetwork.postService.postManager {
+            color green
+        }
+        style socialNetwork.postService.commentManager {
+            color green
+        }
+        style socialNetwork.statisticService.statisticCollector {
+            color green
+        }
+    }
+}

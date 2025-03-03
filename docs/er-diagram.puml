@@ -1,0 +1,114 @@
+@startuml
+
+package "User Service" {
+    entity User {
+        *user_id : UUID [PK]
+        --
+        username : VARCHAR(50)
+        email : VARCHAR(255)
+        password_hash : VARCHAR(255)
+        registration_date : TIMESTAMP
+        role : VARCHAR(50)
+    }
+
+    entity UserSession {
+        *session_id : UUID [PK]
+        --
+        user_id : UUID [FK]
+        session_token : VARCHAR(255)
+        created_at : TIMESTAMP
+        expires_at : TIMESTAMP
+    }
+
+    entity UserProfile {
+        *profile_id : UUID [PK]
+        --
+        user_id : UUID [FK]
+        first_name : VARCHAR(255)
+        last_name : VARCHAR(255)
+        date_of_birth : DATE
+        bio : TEXT
+        profile_picture_url : VARCHAR(1024)
+        website : VARCHAR(255)
+        location : VARCHAR(255)
+    }
+
+    entity UserRelationship {
+        *relationship_id : UUID [PK]
+        --
+        user_id : UUID [FK]
+        friend_id : UUID [FK]
+        status : ENUM('requested', 'accepted', 'blocked')
+        created_at : TIMESTAMP
+    }
+}
+
+package "Post Service" {
+    entity Post {
+        *post_id : UUID [PK]
+        --
+        user_id : UUID [FK]
+        content : TEXT
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+        is_deleted : BOOLEAN
+    }
+
+    entity Comment {
+        *comment_id : UUID [PK]
+        --
+        post_id : UUID [FK]
+        user_id : UUID [FK]
+        content : TEXT
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+        parent_comment_id : UUID [FK]
+    }
+
+    entity PostImage {
+        *image_id : UUID [PK]
+        --
+        post_id : UUID [FK]
+        image_url : VARCHAR(1024)
+        uploaded_at : TIMESTAMP
+    }
+}
+
+package "Statistic Service" {
+    entity PostStatistic {
+        *post_id : UUID [PK, FK]
+        --
+        number_of_likes : INT
+        number_of_views : INT
+        number_of_comments : INT
+    }
+
+    entity UserStatistic {
+        *user_id : UUID [PK, FK]
+        --
+        posts_created : INT
+        comments_written : INT
+        likes_received : INT
+        last_activity : TIMESTAMP
+    }
+
+    entity CommentStatistic {
+        *comment_id : UUID [PK, FK]
+        --
+        likes : INT
+        responses : INT
+    }
+}
+
+User ||--o{ Post: "creates"
+Post ||--o{ Comment: "has"
+Comment ||--o{ Comment: "replies to"
+Post ||--|| PostStatistic: "has"
+Comment ||--|| CommentStatistic: "has"
+User ||--|| UserStatistic: "has"
+User ||--o{ UserSession: "has"
+User ||--o{ UserProfile: "has"
+Post ||--o{ PostImage: "has"
+User }o--o{ UserRelationship: "has relationship with"
+
+@enduml
