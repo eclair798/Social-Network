@@ -1,0 +1,173 @@
+openapi: 3.0.1
+info:
+  title: Simple User Registration API
+  description: API для регистрации пользователей и создания профилей.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5000
+    description: Local Server
+
+paths:
+  /register:
+    post:
+      summary: Registering a new user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                  example: johndoe
+                email:
+                  type: string
+                  format: email
+                  example: johndoe@example.com
+                password:
+                  type: string
+                  format: password
+                  example: MyS3cretP@ssword
+      responses:
+        '201':
+          description: Register is successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                    example: e4b1031a-fc89-435a-b7c6-a1859469e44e
+                  username:
+                    type: string
+                    example: johndoe
+                  email:
+                    type: string
+                    example: johndoe@example.com
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Missing fields in request
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Failed to register
+                  error:
+                    type: string
+
+  /create_profile:
+    post:
+      summary: Creating a new user
+      operationId: createProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+              properties:
+                user_id:
+                  type: string
+                  example: e4b1031a-fc89-435a-b7c6-a1859469e44e
+                first_name:
+                  type: string
+                  example: John
+                last_name:
+                  type: string
+                  example: Doe
+                date_of_birth:
+                  type: string
+                  format: date
+                  example: 1990-01-01
+                phone:
+                  type: string
+                  example: +123456789
+                bio:
+                  type: string
+                  example: A brief bio about the user.
+      responses:
+        '201':
+          description: Profile created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Profile created successfully
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Missing user_id
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Failed to create profile
+                  error:
+                    type: string
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    UserProfile:
+      type: object
+      properties:
+        user_id:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        phone:
+          type: string
+        bio:
+          type: string
