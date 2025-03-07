@@ -1,7 +1,6 @@
 version: "3.8"
 
 services:
-
   api-gateway:
     build: ./services/api-gateway
     ports:
@@ -31,6 +30,16 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+
+
+  user-tests:
+    build:
+      context: ./services/user
+      dockerfile: Dockerfile.test
+    environment:
+      DATABASE_URI: "sqlite:///:memory:"
+      JWT_SECRET_KEY: test_secret_key
+
 
 volumes:
   db_data:
