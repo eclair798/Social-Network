@@ -1,0 +1,104 @@
+openapi: 3.0.0
+info:
+  title: Social Network API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+
+paths:
+  /user/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - email
+                - password
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Invalid input
+
+  /user/login:
+    post:
+      summary: Login and retrieve JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: Login successful, returns JWT token
+        '401':
+          description: Invalid credentials
+
+  /user/update_profile:
+    put:
+      summary: Update user profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                date_of_birth:
+                  type: string
+                  format: date
+                phone:
+                  type: string
+                bio:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated successfully
+        '404':
+          description: User not found
+
+  /user/read_profile:
+    get:
+      summary: Read user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Return user's profile information
+        '404':
+          description: User not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

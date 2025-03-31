@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - user
+    environment:
+      USER_SERVICE_URL: "http://user:5000/user"
+
+  user:
+    build: ./services/user
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URI: postgresql://postgres:password@db:5432/social_db
+      JWT_SECRET_KEY: secret_key
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: social_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+
+  user-tests:
+    build:
+      context: ./services/user
+      dockerfile: Dockerfile.test
+    environment:
+      DATABASE_URI: "sqlite:///:memory:"
+      JWT_SECRET_KEY: test_secret_key
+
+
+volumes:
+  db_data:
