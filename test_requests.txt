@@ -1,6 +1,8 @@
 ТЕСТОВЫЕ ЗАПРОСЫ
 
-docker-compose down -v && docker-compose build --no-cache && docker-compose up
+clear && docker-compose down -v && docker-compose build --no-cache && docker-compose up
+
+USER TEST
 
 -------------------------------
 
@@ -26,7 +28,7 @@ curl -X POST http://localhost:8000/user/login \
 
 curl -X PUT http://localhost:8000/user/update_profile \
 -H "Content-Type: application/json" \
--H "Authorization: Bearer YOUR_TOKEN" \
+-H "Authorization: Bearer token123" \
 -d '{
     "first_name": "John",
     "last_name": "Doe",
@@ -40,8 +42,47 @@ curl -X PUT http://localhost:8000/user/update_profile \
 
 curl -X GET http://localhost:8000/user/read_profile  \
 -H "Content-Type: application/json" \
--H "Authorization: Bearer YOUR_TOKEN" \
+-H "Authorization: Bearer token123" \
 -d '{}'
+
+-------------------------------
+
+
+
+
+POST TEST
+
+-------------------------------
+curl -X POST http://localhost:8000/post/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d '{
+    "content": "Hello from gRPC post!"
+}'
+
+-------------------------------
+
+curl -X GET "http://localhost:8000/post/list?page=1&page_size=10" \
+  -H "Authorization: Bearer token123"
+
+-------------------------------
+
+curl -X GET http://localhost:8000/post/123e4567-e89b-12d3-a456-426614174000 \
+  -H "Authorization: Bearer token123"
+
+-------------------------------
+
+curl -X PUT http://localhost:8000/post/123e4567-e89b-12d3-a456-426614174000 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d '{
+    "content": "Updated content from gRPC!"
+}'
+
+-------------------------------
+
+curl -X DELETE http://localhost:8000/post/123e4567-e89b-12d3-a456-426614174000 \
+  -H "Authorization: Bearer token123"
 
 
 

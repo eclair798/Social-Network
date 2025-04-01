@@ -1,45 +1,86 @@
 version: "3.8"
 
 services:
+
+  # ──────────────────────────────────────────────────
+  # 1) Api-Gateway-сервис (Flask/HTTP)
+  # ──────────────────────────────────────────────────
   api-gateway:
-    build: ./services/api-gateway
+    build:  
+      context: .  
+      dockerfile: services/api-gateway/Dockerfile
+    container_name: api-gateway
     ports:
       - "8000:8000"
     depends_on:
       - user
+      - post
     environment:
       USER_SERVICE_URL: "http://user:5000/user"
+      POST_SERVICE_HOST: "post"
+      POST_SERVICE_PORT: "6000"
+      JWT_SECRET_KEY: "secret_key"
 
+  # ──────────────────────────────────────────────────
+  # 2) User-сервис (Flask/HTTP)
+  # ──────────────────────────────────────────────────
   user:
     build: ./services/user
+    container_name: user
     ports:
       - "5000:5000"
-    environment:
-      DATABASE_URI: postgresql://postgres:password@db:5432/social_db
-      JWT_SECRET_KEY: secret_key
     depends_on:
-      - db
+      - user_db
+    environment:
+      USER_DATABASE_URI: "postgresql://postgres:password@user_db:5432/user_db"
+      JWT_SECRET_KEY: "secret_key"
 
-  db:
+  # ──────────────────────────────────────────────────
+  # 3) Post-сервис (gRPC)
+  # ──────────────────────────────────────────────────
+  post:
+    build:  
+      context: .  
+      dockerfile: services/post/Dockerfile 
+    container_name: post
+    ports:
+      - "6000:6000"
+    depends_on:
+      - post_db
+    environment:
+      POST_DATABASE_URI: "postgresql://postgres:password@post_db:5432/post_db"
+
+  # ──────────────────────────────────────────────────
+  # 4) База данных для user (PostgreSQL)
+  # ──────────────────────────────────────────────────
+  user_db:
     image: postgres:15-alpine
+    container_name: user_db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: social_db
+      POSTGRES_DB: user_db
     ports:
-      - "5432:5432"
+      - "5433:5432" 
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - user_db_data:/var/lib/postgresql/data
+    # Если не надо наружу, можно убрать ports
 
-
-  user-tests:
-    build:
-      context: ./services/user
-      dockerfile: Dockerfile.test
+  # ──────────────────────────────────────────────────
+  # 5) База данных для post (PostgreSQL)
+  # ──────────────────────────────────────────────────
+  post_db:
+    image: postgres:15-alpine
+    container_name: post_db
     environment:
-      DATABASE_URI: "sqlite:///:memory:"
-      JWT_SECRET_KEY: test_secret_key
-
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: post_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - post_db_data:/var/lib/postgresql/data
 
 volumes:
-  db_data:
+  user_db_data:
+  post_db_data:
