@@ -67,12 +67,12 @@ curl -X GET "http://localhost:8000/post/list?page=1&page_size=10" \
 
 -------------------------------
 
-curl -X GET http://localhost:8000/post/123e4567-e89b-12d3-a456-426614174000 \
+curl -X GET http://localhost:8000/post/post_id \
   -H "Authorization: Bearer token123"
 
 -------------------------------
 
-curl -X PUT http://localhost:8000/post/123e4567-e89b-12d3-a456-426614174000 \
+curl -X PUT http://localhost:8000/post/post_id \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer token123" \
   -d '{
@@ -81,7 +81,7 @@ curl -X PUT http://localhost:8000/post/123e4567-e89b-12d3-a456-426614174000 \
 
 -------------------------------
 
-curl -X DELETE http://localhost:8000/post/123e4567-e89b-12d3-a456-426614174000 \
+curl -X DELETE http://localhost:8000/post/post_id \
   -H "Authorization: Bearer token123"
 
 
@@ -91,4 +91,5 @@ curl -X DELETE http://localhost:8000/post/123e4567-e89b-12d3-a456-426614174000 \
 ТЕСТИРОВАНИЕ
 
 docker-compose up --build user-tests
+docker-compose up --build post-tests
 

@@ -7,6 +7,10 @@ COPY services/post/ .
 COPY services/post/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY services/post/requirements-test.txt .
+RUN pip install --no-cache-dir -r requirements-test.txt
+
+
 ENV PYTHONPATH="/post/app:$PYTHONPATH"
 COPY proto/post.proto .
 RUN python -m grpc_tools.protoc \
@@ -16,6 +20,7 @@ RUN python -m grpc_tools.protoc \
      post.proto
 
 EXPOSE 6000
+
 
 CMD ["pytest", "tests"]
 

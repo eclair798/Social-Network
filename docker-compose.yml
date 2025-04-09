@@ -35,6 +35,14 @@ services:
       USER_DATABASE_URI: "postgresql://postgres:password@user_db:5432/user_db"
       JWT_SECRET_KEY: "secret_key"
 
+  user-tests:
+    build:
+      context: ./services/user
+      dockerfile: Dockerfile.test
+    environment:
+      DATABASE_URI: "sqlite:///:memory:"
+      JWT_SECRET_KEY: test_secret_key
+
   # ──────────────────────────────────────────────────
   # 3) Post-сервис (gRPC)
   # ──────────────────────────────────────────────────
@@ -49,6 +57,14 @@ services:
       - post_db
     environment:
       POST_DATABASE_URI: "postgresql://postgres:password@post_db:5432/post_db"
+
+  post-tests:
+    build:
+      context: .  
+      dockerfile: services/post/Dockerfile.test
+    environment:
+      DATABASE_URI: "sqlite:///:memory:"
+      JWT_SECRET_KEY: test_secret_key
 
   # ──────────────────────────────────────────────────
   # 4) База данных для user (PostgreSQL)
