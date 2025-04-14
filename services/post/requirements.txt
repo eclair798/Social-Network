@@ -1,8 +1,8 @@
 flask
-flask_jwt_extended
-PyJWT
-requests
+flask-sqlalchemy
+psycopg2-binary
 python-dotenv
 grpcio
 grpcio-tools
 protobuf
+sqlalchemy

@@ -55,7 +55,8 @@ def login():
     user = User.query.filter_by(username=data['username']).first()
     if user and check_password_hash(user.password_hash, data['password']):
         access_token = create_access_token(identity=user.user_id)
-        return {"msg": "Login is successful", "token": access_token}, 200
+        req = {"msg": "Login is successful", "user_token": access_token, "user_id": user.user_id}
+        return req, 200
     return jsonify({"msg": "Invalid credentials"}), 401
 
 @bp.route('/update_profile', methods=['PUT'])

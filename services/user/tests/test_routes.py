@@ -60,7 +60,7 @@ def test_login(client):
         "password": "testpass"
     })
     assert response.status_code == 200
-    assert "token" in response.get_json()
+    assert "user_token" in response.get_json()
 
 def test_update_profile(client, token):
     response = client.put('/user/update_profile', json={

@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package post;
+
+service PostService {
+  rpc CreatePost(CreatePostRequest) returns (PostResponse);
+  rpc GetPost(GetPostRequest) returns (PostResponse);
+  rpc UpdatePost(UpdatePostRequest) returns (PostResponse);
+  rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
+  rpc ListPosts(ListPostsRequest) returns (ListPostsResponse);
+}
+
+message CreatePostRequest {
+  string user_id = 1;
+  string content = 2;
+}
+
+message GetPostRequest { string post_id = 1; }
+
+message UpdatePostRequest {
+  string post_id = 1;
+  string user_id = 2;
+  string content = 3;
+}
+
+message DeletePostRequest {
+  string post_id = 1;
+  string user_id = 2;
+}
+
+message DeletePostResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListPostsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message ListPostsResponse {
+  repeated PostResponse posts = 1;
+  int32 total = 2;
+}
+
+message PostResponse {
+  string post_id = 1;
+  string user_id = 2;
+  string content = 3;
+  string created_at = 4;
+  string updated_at = 5;
+  bool is_deleted = 6;
+}
