@@ -6,3 +6,4 @@ marshmallow-sqlalchemy
 psycopg2-binary
 flask-jwt-extended
 python-dotenv
+kafka-python
