@@ -8,6 +8,10 @@ service PostService {
   rpc UpdatePost(UpdatePostRequest) returns (PostResponse);
   rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
   rpc ListPosts(ListPostsRequest) returns (ListPostsResponse);
+
+  rpc LikePost(LikePostRequest) returns (LikePostResponse);
+  rpc CommentPost(CommentPostRequest) returns (CommentPostResponse);
+  rpc ListComments(ListCommentsRequest) returns (ListCommentsResponse);
 }
 
 message CreatePostRequest {
@@ -50,4 +54,48 @@ message PostResponse {
   string created_at = 4;
   string updated_at = 5;
   bool is_deleted = 6;
+}
+
+message LikePostRequest {
+  string post_id = 1;
+  string user_id = 2;
+}
+
+message LikePostResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message CommentPostRequest {
+  string post_id = 1;
+  string user_id = 2;
+  string content = 3;
+  string parent_comment_id = 4;
+}
+
+message CommentPostResponse {
+  string comment_id = 1;
+  string post_id = 2;
+  string user_id = 3;
+  string content = 4;
+  string created_at = 5;
+}
+
+message ListCommentsRequest {
+  string post_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message ListCommentsResponse {
+  repeated CommentData comments = 1;
+  int32 total = 2;
+}
+
+message CommentData {
+  string comment_id = 1;
+  string post_id = 2;
+  string user_id = 3;
+  string content = 4;
+  string created_at = 5;
 }

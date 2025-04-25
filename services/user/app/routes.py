@@ -6,6 +6,9 @@ import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
+from .kafka_producer import produce_user_registered_event
+
+
 bp = Blueprint('routes', __name__)
 
 @bp.route('/register', methods=['POST'])
@@ -37,6 +40,7 @@ def register():
 
     try:
         db.session.commit()
+        produce_user_registered_event(u_id)
     except Exception as e:
         db.session.rollback()
         return jsonify({"msg": "Failed to register", "error": str(e)}), 500
@@ -55,7 +59,7 @@ def login():
     user = User.query.filter_by(username=data['username']).first()
     if user and check_password_hash(user.password_hash, data['password']):
         access_token = create_access_token(identity=user.user_id)
-        req = {"msg": "Login is successful", "user_token": access_token, "user_id": user.user_id}
+        req = {"msg": "Login is successful", "user_token": access_token}
         return req, 200
     return jsonify({"msg": "Invalid credentials"}), 401
 
@@ -116,3 +120,19 @@ def read_profile():
     }
 
     return jsonify(profile_data), 200
+
+@bp.route('/check_user', methods=['GET', 'POST', 'PUT'])
+@jwt_required()
+def check_user():
+    current_user_id = get_jwt_identity()
+    user = User.query.filter_by(user_id=current_user_id).first()
+
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    # user_profile = UserProfile.query.filter_by(user_id=current_user_id).first()
+
+    # if not user_profile:
+    #     return jsonify({"msg": "Profile not found"}), 404
+
+    return jsonify({"user_id": user.user_id}), 200

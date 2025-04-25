@@ -4,11 +4,11 @@ from concurrent import futures
 import grpc
 from sqlalchemy.exc import SQLAlchemyError
 from .database import db
-from .models import Post
+from .models import Post, Comment, Like
 from datetime import datetime
 
-
 from app import post_pb2, post_pb2_grpc
+from .kafka_producer import produce_event
 
 
 class PostServiceServicer(post_pb2_grpc.PostServiceServicer):
@@ -125,6 +125,101 @@ class PostServiceServicer(post_pb2_grpc.PostServiceServicer):
                 )
                 resp.posts.append(post_resp)
             return resp
+
+    def LikePost(self, request, context):
+        with self.app.app_context():
+            post = Post.query.filter_by(post_id=request.post_id, is_deleted=False).first()
+            if not post:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_details("Post not found or deleted")
+                return post_pb2.LikePostResponse(success=False, message="No post")
+            
+            existing_like = Like.query.filter_by(post_id=request.post_id, user_id=request.user_id).first()
+            if existing_like:
+                return post_pb2.LikePostResponse(success=True, message="Already liked")
+
+            new_like = Like(
+                post_id=request.post_id,
+                user_id=request.user_id
+            )
+            try:
+                db.session.add(new_like)
+                db.session.commit()
+                # отправляем событие
+                produce_event(
+                    topic="action-likes",
+                    user_id=request.user_id,
+                    entity_id=request.post_id,
+                    action_type="like"
+                )
+                return post_pb2.LikePostResponse(success=True, message="Liked successfully")
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details(str(e))
+                return post_pb2.LikePostResponse(success=False, message="Failed")
+
+    def CommentPost(self, request, context):
+        with self.app.app_context():
+            post = Post.query.filter_by(post_id=request.post_id, is_deleted=False).first()
+            if not post:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_details("Post not found or deleted")
+                return post_pb2.CommentPostResponse()
+
+            new_comment = Comment(
+                post_id=request.post_id,
+                user_id=request.user_id,
+                content=request.content,
+                parent_comment_id=request.parent_comment_id if request.parent_comment_id else None
+            )
+            try:
+                db.session.add(new_comment)
+                db.session.commit()
+                # отправляем событие
+                produce_event(
+                    topic="action-comments",
+                    user_id=request.user_id,
+                    entity_id=request.post_id,
+                    action_type="comment"
+                )
+                return post_pb2.CommentPostResponse(
+                    comment_id=new_comment.comment_id,
+                    post_id=new_comment.post_id,
+                    user_id=new_comment.user_id,
+                    content=new_comment.content,
+                    created_at=str(new_comment.created_at)
+                )
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details(str(e))
+                return post_pb2.CommentPostResponse()
+
+    def ListComments(self, request, context):
+        with self.app.app_context():
+            page = request.page or 1
+            page_size = request.page_size or 10
+
+            query = Comment.query.filter_by(post_id=request.post_id)
+            total = query.count()
+            comments = query.order_by(Comment.created_at.desc()) \
+                            .limit(page_size) \
+                            .offset((page - 1)*page_size) \
+                            .all()
+            
+            resp = post_pb2.ListCommentsResponse(total=total)
+            for c in comments:
+                comment_data = post_pb2.CommentData(
+                    comment_id=c.comment_id,
+                    post_id=c.post_id,
+                    user_id=c.user_id,
+                    content=c.content,
+                    created_at=str(c.created_at)
+                )
+                resp.comments.append(comment_data)
+            return resp
+
 
 
 def serve_grpc_server(flask_app, port=6000):
