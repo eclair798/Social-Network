@@ -101,7 +101,6 @@ def create_post():
         return jsonify({"error": str(e)}), 500
 
 
-
 @bp.route('/posts', methods=['GET'])
 def list_posts():
     """
@@ -142,13 +141,18 @@ def get_post(post_id):
     """
     GET /post/<post_id>
     """
-    # user_id = check_user()
-    # if not user_id:
-    #     return jsonify({"error": "Unauthorized"}), 401
+    user_id = check_user()
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
     
 
     stub = get_post_stub()
-    req = post_pb2.GetPostRequest(post_id=post_id)
+    
+    req = post_pb2.GetPostRequest(
+        post_id=post_id,
+        user_id=user_id
+    )
+
     try:
         resp = stub.GetPost(req)
         if not resp.post_id:

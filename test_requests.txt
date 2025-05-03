@@ -69,14 +69,14 @@ curl -X GET "http://localhost:8000/posts" \
 
 -------------------------------
 
-curl -X GET http://localhost:8000/post/post_id \
+curl -X GET http://localhost:8000/post/post123 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer token123" \
   -d '{}' -w '\n'
 
 -------------------------------
 
-curl -X PUT http://localhost:8000/post/post_id \
+curl -X PUT http://localhost:8000/post/post123 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer token123" \
   -d '{
@@ -85,7 +85,7 @@ curl -X PUT http://localhost:8000/post/post_id \
 
 -------------------------------
 
-curl -X DELETE http://localhost:8000/post/post_id \
+curl -X DELETE http://localhost:8000/post/post123 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer token123" \
   -d '{}' -w '\n'
@@ -96,7 +96,7 @@ curl -X DELETE http://localhost:8000/post/post_id \
 COMMENTS & LIKES
 -------------------------------
 
-curl -X POST http://localhost:8000/post/post_id/comment \
+curl -X POST http://localhost:8000/post/post123/comment \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer token123" \
   -d '{
@@ -106,7 +106,7 @@ curl -X POST http://localhost:8000/post/post_id/comment \
 
 -------------------------------
 
-curl -X POST http://localhost:8000/post/post_id/comment \
+curl -X POST http://localhost:8000/post/post123/comment \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer token123" \
   -d '{
@@ -117,19 +117,22 @@ curl -X POST http://localhost:8000/post/post_id/comment \
 
 -------------------------------
 
-curl -X GET "http://localhost:8000/post/post_id/comments?page=1&page_size=10" \
+curl -X GET "http://localhost:8000/post/post123/comments?page=1&page_size=10" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer token123" \
   -d '{}' -w '\n'
 
 -------------------------------
 
-curl -X POST http://localhost:8000/post/post_id/like \
+curl -X POST http://localhost:8000/post/post123/like \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer token123" \
   -d '{}' -w '\n'
 
 -------------------------------
+
+token123
+post123
 
 -------------------------------
 

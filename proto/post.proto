@@ -19,7 +19,10 @@ message CreatePostRequest {
   string content = 2;
 }
 
-message GetPostRequest { string post_id = 1; }
+message GetPostRequest {
+  string post_id = 1;
+  string user_id = 2;
+}
 
 message UpdatePostRequest {
   string post_id = 1;

@@ -46,6 +46,16 @@ class PostServiceServicer(post_pb2_grpc.PostServiceServicer):
                 context.set_code(grpc.StatusCode.NOT_FOUND)
                 context.set_details("Post not found or is deleted")
                 return post_pb2.PostResponse()
+            
+            if request.user_id:
+                # отправляем событие
+                produce_event(
+                    topic="action-views",
+                    user_id=request.user_id,
+                    entity_id=request.post_id,
+                    action_type="view"
+                )
+
             return post_pb2.PostResponse(
                 post_id=post.post_id,
                 user_id=post.user_id,

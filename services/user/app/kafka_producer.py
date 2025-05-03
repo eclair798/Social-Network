@@ -20,7 +20,7 @@ def produce_user_registered_event(user_id: str):
     producer = UserKafkaProducer.get_producer()
     event_data = {
         "user_id": user_id,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.utcnow().isoformat()
     }
     producer.send("user-registration", event_data)
     producer.flush()
