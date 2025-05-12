@@ -12,7 +12,7 @@ curl -X POST http://localhost:8000/user/register \
     "username": "exampleuser",
     "email": "user@example.com",
     "password": "yourpassword"
-}'
+}' -w '\n'
 
 -------------------------------
 
@@ -21,7 +21,7 @@ curl -X POST http://localhost:8000/user/login \
 -d '{
     "username": "exampleuser",
     "password": "yourpassword"
-}'
+}' -w '\n'
 
 
 -------------------------------
@@ -35,15 +35,15 @@ curl -X PUT http://localhost:8000/user/update_profile \
     "date_of_birth": "1990-01-01",
     "phone": "+1234567890",
     "bio": "Updated bio"
-}'
+}' -w '\n'
 
 -------------------------------
 
 
 curl -X GET http://localhost:8000/user/read_profile  \
--H "Content-Type: application/json" \
--H "Authorization: Bearer token123" \
--d '{}'
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d '{}' -w '\n'
 
 -------------------------------
 
@@ -57,34 +57,82 @@ curl -X POST http://localhost:8000/post/create \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer token123" \
   -d '{
-    "content": "Hello from gRPC post!"
-}'
+    "content": "It is new Post!"
+}' -w '\n'
 
 -------------------------------
 
-curl -X GET "http://localhost:8000/post/list?page=1&page_size=10" \
-  -H "Authorization: Bearer token123"
+curl -X GET "http://localhost:8000/posts" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d '{}' -w '\n'
 
 -------------------------------
 
-curl -X GET http://localhost:8000/post/post_id \
-  -H "Authorization: Bearer token123"
+curl -X GET http://localhost:8000/post/post123 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d '{}' -w '\n'
 
 -------------------------------
 
-curl -X PUT http://localhost:8000/post/post_id \
+curl -X PUT http://localhost:8000/post/post123 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer token123" \
   -d '{
-    "content": "Updated content from gRPC!"
-}'
+    "content": "Updated content in Post!"
+}' -w '\n'
 
 -------------------------------
 
-curl -X DELETE http://localhost:8000/post/post_id \
-  -H "Authorization: Bearer token123"
+curl -X DELETE http://localhost:8000/post/post123 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d '{}' -w '\n'
+
+-------------------------------
 
 
+COMMENTS & LIKES
+-------------------------------
+
+curl -X POST http://localhost:8000/post/post123/comment \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d '{
+    "content": "It is new Comment!"
+}' -w '\n'
+
+
+-------------------------------
+
+curl -X POST http://localhost:8000/post/post123/comment \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d '{
+    "content": "It is answer on Comment!",
+    "parent_comment_id": "comment_id"
+}' -w '\n'
+
+
+-------------------------------
+
+curl -X GET "http://localhost:8000/post/post123/comments?page=1&page_size=10" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d '{}' -w '\n'
+
+-------------------------------
+
+curl -X POST http://localhost:8000/post/post123/like \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer token123" \
+  -d '{}' -w '\n'
+
+-------------------------------
+
+token123
+post123
 
 -------------------------------
 
