@@ -15,5 +15,13 @@ RUN python -m grpc_tools.protoc \
     --grpc_python_out=app \
     post.proto
 
+ENV PYTHONPATH="/api-gateway/app:$PYTHONPATH"
+COPY proto/stat.proto .
+RUN python -m grpc_tools.protoc \
+     -I. \
+     --python_out=app \
+     --grpc_python_out=app \
+     stat.proto
+
 EXPOSE 8000
 CMD ["python", "main.py"]

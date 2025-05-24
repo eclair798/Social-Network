@@ -78,3 +78,5 @@ dmypy.json
 # Docker
 *.log
 docker-compose.override.yml
+
+temp

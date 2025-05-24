@@ -7,3 +7,6 @@ JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "secret_key")
 
 POST_SERVICE_HOST = "post"  
 POST_SERVICE_PORT = "6000"
+
+STAT_SERVICE_HOST = "stat"  
+STAT_SERVICE_PORT = "7000"
