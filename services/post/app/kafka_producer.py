@@ -22,8 +22,9 @@ def produce_event(topic: str, user_id: str, entity_id: str, action_type: str):
         "user_id": user_id,
         "entity_id": entity_id,
         "action_type": action_type,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
     }
+    print(f"Producing event: {event_data} to topic {topic}")
     producer.send(topic, event_data)
     producer.flush()
 

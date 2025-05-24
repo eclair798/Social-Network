@@ -96,6 +96,159 @@ paths:
         '404':
           description: User not found
 
+  /stat/post/{post_id}:
+    get:
+      summary: Get total statistics for a post (views, likes, comments)
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Statistics for the post
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  views:
+                    type: integer
+                  likes:
+                    type: integer
+                  comments:
+                    type: integer
+        '404':
+          description: Post not found
+
+  /stat/post/{post_id}/views_by_day:
+    get:
+      summary: Get daily views for a post
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Daily views
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    count:
+                      type: integer
+
+  /stat/post/{post_id}/likes_by_day:
+    get:
+      summary: Get daily likes for a post
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Daily likes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    count:
+                      type: integer
+
+  /stat/post/{post_id}/comments_by_day:
+    get:
+      summary: Get daily comments for a post
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Daily comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    count:
+                      type: integer
+
+  /stat/top_posts:
+    get:
+      summary: Get top 10 posts by selected metric
+      parameters:
+        - in: query
+          name: metric
+          required: false
+          schema:
+            type: string
+            enum: [like, comment, view]
+            default: like
+      responses:
+        '200':
+          description: Top 10 posts by likes/comments/views
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    post_id:
+                      type: string
+                    count:
+                      type: integer
+
+  /stat/top_users:
+    get:
+      summary: Get top 10 users by selected metric
+      parameters:
+        - in: query
+          name: metric
+          required: false
+          schema:
+            type: string
+            enum: [like, comment, view]
+            default: like
+      responses:
+        '200':
+          description: Top 10 users by likes/comments/views
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user_id:
+                      type: string
+                    count:
+                      type: integer
+
 components:
   securitySchemes:
     bearerAuth:

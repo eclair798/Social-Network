@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package stat;
+
+service StatService {
+  rpc GetPostStats(PostIdRequest) returns (PostStatsResponse);
+  rpc GetPostViewsByDay(PostIdRequest) returns (StatsByDayResponse);
+  rpc GetPostLikesByDay(PostIdRequest) returns (StatsByDayResponse);
+  rpc GetPostCommentsByDay(PostIdRequest) returns (StatsByDayResponse);
+  rpc GetTopPosts(TopRequest) returns (TopResponse);
+  rpc GetTopUsers(TopRequest) returns (TopResponse);
+}
+
+message PostIdRequest { string post_id = 1; }
+
+message PostStatsResponse {
+  int64 views = 1;
+  int64 likes = 2;
+  int64 comments = 3;
+}
+
+message StatsByDay {
+  string date = 1;
+  int64 count = 2;
+}
+
+message StatsByDayResponse { repeated StatsByDay by_day = 1; }
+
+message TopRequest {
+  string metric = 1; // view, like, comment
+}
+
+message TopItem {
+  string id = 1; // post_id или user_id
+  int64 value = 2;
+}
+
+message TopResponse { repeated TopItem top_items = 1; }

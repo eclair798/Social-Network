@@ -1,0 +1,7 @@
+clickhouse-driver
+grpcio
+grpcio-tools
+protobuf
+kafka-python
+flask
+python-dotenv

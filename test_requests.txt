@@ -2,6 +2,8 @@
 
 clear && docker-compose down -v && docker-compose build --no-cache && docker-compose up
 
+===============================
+
 USER TEST
 
 -------------------------------
@@ -48,7 +50,7 @@ curl -X GET http://localhost:8000/user/read_profile  \
 -------------------------------
 
 
-
+===============================
 
 POST TEST
 
@@ -92,8 +94,10 @@ curl -X DELETE http://localhost:8000/post/post123 \
 
 -------------------------------
 
+===============================
 
 COMMENTS & LIKES
+
 -------------------------------
 
 curl -X POST http://localhost:8000/post/post123/comment \
@@ -111,7 +115,7 @@ curl -X POST http://localhost:8000/post/post123/comment \
   -H "Authorization: Bearer token123" \
   -d '{
     "content": "It is answer on Comment!",
-    "parent_comment_id": "comment_id"
+    "parent_comment_id": "comment123"
 }' -w '\n'
 
 
@@ -131,6 +135,56 @@ curl -X POST http://localhost:8000/post/post123/like \
 
 -------------------------------
 
+
+
+===============================
+
+STAT TESTS
+
+-------------------------------
+Получить количество просмотров, лайков и комментариев по посту
+
+curl -X GET http://localhost:8000/stat/post/post123 \
+  -H "Content-Type: application/json" \
+  -d '{}' -w '\n'
+  
+-------------------------------
+Динамика просмотров по дням
+
+curl -X GET http://localhost:8000/stat/post/post123/views_by_day \
+  -H "Content-Type: application/json" \
+  -d '{}' -w '\n'
+  
+-------------------------------
+Динамика лайков по дням
+
+curl -X GET http://localhost:8000/stat/post/post123/likes_by_day \
+  -H "Content-Type: application/json" \
+  -d '{}' -w '\n'
+
+-------------------------------
+Динамика комментариев по дням
+
+curl -X GET http://localhost:8000/stat/post/post123/comments_by_day \
+  -H "Content-Type: application/json" \
+  -d '{}' -w '\n'
+
+-------------------------------
+ТОП-10 постов по лайкам
+
+curl -X GET "http://localhost:8000/stat/top_posts?metric=like" \
+  -H "Content-Type: application/json" \
+  -d '{}' -w '\n'
+
+-------------------------------
+ТОП-10 пользователей по просмотрам
+
+curl -X GET "http://localhost:8000/stat/top_users?metric=view" \
+  -H "Content-Type: application/json" \
+  -d '{}' -w '\n'
+
+-------------------------------
+
 token123
 post123
 
@@ -139,5 +193,4 @@ post123
 ТЕСТИРОВАНИЕ
 
 docker-compose up --build user-tests
-docker-compose up --build post-tests
 

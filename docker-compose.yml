@@ -42,6 +42,19 @@ services:
       DATABASE_URI: "sqlite:///:memory:"
       JWT_SECRET_KEY: test_secret_key
 
+  user_db:
+    image: postgres:15-alpine
+    container_name: user_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user_db
+    ports:
+      - "5433:5432" 
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    # Если не надо наружу, можно убрать ports
+
   # ──────────────────────────────────────────────────
   # 3) Post-сервис (gRPC)
   # ──────────────────────────────────────────────────
@@ -58,34 +71,6 @@ services:
       POST_DATABASE_URI: "postgresql://postgres:password@post_db:5432/post_db"
       KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
 
-
-  # post-tests:
-  #   build:
-  #     context: .  
-  #     dockerfile: services/post/Dockerfile.test
-  #   environment:
-  #     DATABASE_URI: "sqlite:///:memory:"
-  #     JWT_SECRET_KEY: test_secret_key
-
-  # ──────────────────────────────────────────────────
-  # 4) База данных для user (PostgreSQL)
-  # ──────────────────────────────────────────────────
-  user_db:
-    image: postgres:15-alpine
-    container_name: user_db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: user_db
-    ports:
-      - "5433:5432" 
-    volumes:
-      - user_db_data:/var/lib/postgresql/data
-    # Если не надо наружу, можно убрать ports
-
-  # ──────────────────────────────────────────────────
-  # 5) База данных для post (PostgreSQL)
-  # ──────────────────────────────────────────────────
   post_db:
     image: postgres:15-alpine
     container_name: post_db
@@ -98,8 +83,38 @@ services:
     volumes:
       - post_db_data:/var/lib/postgresql/data
 
+
   # ──────────────────────────────────────────────────
-  # 6) Kafka
+  # 4) Stat-сервис (gRPC)
+  # ──────────────────────────────────────────────────
+
+  stat:
+    build:  
+      context: .  
+      dockerfile: services/stat/Dockerfile
+    container_name: stat
+    ports:
+      - "7000:7000"
+    depends_on:
+      - clickhouse
+      - kafka
+    environment:
+      CLICKHOUSE_HOST: "clickhouse"
+      CLICKHOUSE_PORT: "9000"
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+
+  clickhouse:
+    image: yandex/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "8123:8123" # HTTP
+      - "9000:9000" # Native client
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+
+
+  # ──────────────────────────────────────────────────
+  # 5) Kafka
   # ──────────────────────────────────────────────────
 
   zookeeper:
@@ -139,3 +154,4 @@ services:
 volumes:
   user_db_data:
   post_db_data:
+  clickhouse_data:

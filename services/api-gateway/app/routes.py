@@ -6,8 +6,9 @@ from flask import Blueprint, request, Response, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 from . import post_pb2, post_pb2_grpc
+from . import stat_pb2, stat_pb2_grpc
 
-from .config import USER_SERVICE_URL, POST_SERVICE_HOST, POST_SERVICE_PORT
+from .config import USER_SERVICE_URL, POST_SERVICE_HOST, POST_SERVICE_PORT, STAT_SERVICE_HOST, STAT_SERVICE_PORT
 
 bp = Blueprint('routes', __name__)
 
@@ -38,11 +39,6 @@ def proxy(path):
 
     return Response(json.dumps(response_content), response.status_code, response.headers.items())
 
-
-# ------------------------------------------------------------------
-# POST
-# ------------------------------------------------------------------
-
 def check_user():
     url = f'{USER_SERVICE_URL}/check_user'
     headers = dict(request.headers)
@@ -58,6 +54,9 @@ def check_user():
         return response.json().get('user_id')
     return ""
 
+# ------------------------------------------------------------------
+# POST
+# ------------------------------------------------------------------
 
 
 def get_post_stub():
@@ -316,3 +315,61 @@ def proxy_post(path):
     if not user_id:
        return jsonify({"error": "Unauthorized"}), 401
     return jsonify({"error": "Not implemented or invalid route"}), 404
+
+
+# ------------------------------------------------------------------
+# STAT
+# ------------------------------------------------------------------
+
+def get_stat_stub():
+    channel = grpc.insecure_channel(f"{STAT_SERVICE_HOST}:{STAT_SERVICE_PORT}")
+    return stat_pb2_grpc.StatServiceStub(channel)
+
+@bp.route('/stat/post/<post_id>', methods=['GET'])
+def post_stats(post_id):
+    stub = get_stat_stub()
+    req = stat_pb2.PostIdRequest(post_id=post_id)
+    resp = stub.GetPostStats(req)
+    return jsonify({
+        "views": resp.views,
+        "likes": resp.likes,
+        "comments": resp.comments
+    })
+
+@bp.route('/stat/post/<post_id>/views_by_day', methods=['GET'])
+def post_views_by_day(post_id):
+    stub = get_stat_stub()
+    req = stat_pb2.PostIdRequest(post_id=post_id)
+    resp = stub.GetPostViewsByDay(req)
+    return jsonify([{ "date": d.date, "count": d.count } for d in resp.by_day])
+
+@bp.route('/stat/post/<post_id>/likes_by_day', methods=['GET'])
+def post_likes_by_day(post_id):
+    stub = get_stat_stub()
+    req = stat_pb2.PostIdRequest(post_id=post_id)
+    resp = stub.GetPostLikesByDay(req)
+    return jsonify([{ "date": d.date, "count": d.count } for d in resp.by_day])
+
+@bp.route('/stat/post/<post_id>/comments_by_day', methods=['GET'])
+def post_comments_by_day(post_id):
+    stub = get_stat_stub()
+    req = stat_pb2.PostIdRequest(post_id=post_id)
+    resp = stub.GetPostCommentsByDay(req)
+    return jsonify([{ "date": d.date, "count": d.count } for d in resp.by_day])
+
+@bp.route('/stat/top_posts', methods=['GET'])
+def top_posts():
+    metric = request.args.get('metric', 'like')
+    stub = get_stat_stub()
+    req = stat_pb2.TopRequest(metric=metric)
+    resp = stub.GetTopPosts(req)
+    return jsonify([{ "post_id": item.id, "count": item.value } for item in resp.top_items])
+
+@bp.route('/stat/top_users', methods=['GET'])
+def top_users():
+    metric = request.args.get('metric', 'like')
+    stub = get_stat_stub()
+    req = stat_pb2.TopRequest(metric=metric)
+    resp = stub.GetTopUsers(req)
+    return jsonify([{ "user_id": item.id, "count": item.value } for item in resp.top_items])
+
